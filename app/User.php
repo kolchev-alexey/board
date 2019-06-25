@@ -36,4 +36,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    //Add extra attribute
+    // protected $attributes = ['shortName'];
+
+    //Make it available in the json response
+    protected $appends = ['shortName'];
+
+
+    public function getshortNameAttribute()
+    {
+        return substr($this->name, 0, 1);
+    }
 }
