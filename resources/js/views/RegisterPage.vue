@@ -70,9 +70,9 @@
 
 <script>
 import { required, email, minLength, maxLength, alphaNum, alpha } from 'vuelidate/lib/validators'
-import registrationService from '@/services/registration'
-import Logo from '@/components/Logo.vue'
-import PageFooter from '@/components/PageFooter.vue'
+import registrationService from '../services/registration'
+import Logo from '../components/Logo.vue'
+import PageFooter from '../components/PageFooter.vue'
 
 export default {
   name: 'RegisterPage',

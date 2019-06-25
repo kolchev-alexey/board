@@ -1,4 +1,4 @@
-import meService from '@/services/me'
+import meService from '../services/me'
 
 export const logout = ({ commit }) => {
   commit('logout')

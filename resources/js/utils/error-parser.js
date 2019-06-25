@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import { i18n } from '@/i18n'
-import eventBus from '@/event-bus'
+import { i18n } from '../i18n'
+import eventBus from '../event-bus'
 
 export default {
   parse (error) {

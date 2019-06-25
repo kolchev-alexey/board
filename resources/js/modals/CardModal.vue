@@ -107,9 +107,9 @@ import $ from 'jquery'
 import { formatDistance } from 'date-fns'
 import autosize from 'autosize'
 import showdown from 'showdown'
-import notify from '@/utils/notify'
-import cardService from '@/services/cards'
-import Uploader from '@/components/Uploader'
+import notify from '../utils/notify'
+import cardService from '../services/cards'
+import Uploader from '../components/Uploader'
 
 showdown.setOption('strikethrough', true)
 showdown.setOption('tables', true)

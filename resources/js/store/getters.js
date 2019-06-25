@@ -5,7 +5,7 @@ export const hasBoards = state => {
 }
 
 export const personalBoards = state => {
-  return state.boards.filter(board => board.teamId === 0)
+  return state.boards.filter(board => board.team_id === null)
 }
 
 export const teamBoards = state => {
@@ -15,7 +15,7 @@ export const teamBoards = state => {
     teams.push({
       id: team.id,
       name: team.name,
-      boards: state.boards.filter(board => board.teamId === team.id)
+      boards: state.boards.filter(board => board.team_id === team.id)
     })
   })
 

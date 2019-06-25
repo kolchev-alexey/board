@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import SockJS from 'sockjs-client'
-import globalBus from '@/event-bus'
+import globalBus from './event-bus'
 
 class RealTimeClient {
   constructor () {

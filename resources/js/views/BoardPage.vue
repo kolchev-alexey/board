@@ -65,7 +65,7 @@
       </div>
     </div>
     <AddMemberModal
-      :boardId="board.id"
+      :board_id="board.id"
       @added="onMemberAdded"/>
     <CardModal
       :card="openedCard"
@@ -79,13 +79,13 @@
 <script>
 import draggable from 'vuedraggable'
 import $ from 'jquery'
-import PageHeader from '@/components/PageHeader.vue'
-import AddMemberModal from '@/modals/AddMemberModal.vue'
-import CardModal from '@/modals/CardModal.vue'
-import notify from '@/utils/notify'
-import boardService from '@/services/boards'
-import cardListService from '@/services/card-lists'
-import cardService from '@/services/cards'
+import PageHeader from '../components/PageHeader.vue'
+import AddMemberModal from '../modals/AddMemberModal.vue'
+import CardModal from '../modals/CardModal.vue'
+import notify from '../utils/notify'
+import boardService from '../services/boards'
+import cardListService from '../services/card-lists'
+import cardService from '../services/cards'
 
 export default {
   name: 'BoardPage',
@@ -117,8 +117,8 @@ export default {
     '$route' (to, from) {
       // Switch from one board to another
       if (to.name === from.name && to.name === 'board') {
-        this.unsubscribeFromRealTimeUpdate(from.params.boardId)
-        this.loadBoard(to.params.boardId)
+        this.unsubscribeFromRealTimeUpdate(from.params.board_id)
+        this.loadBoard(to.params.board_id)
       }
       // Open a card
       if (to.name === 'card' && from.name === 'board') {
@@ -146,7 +146,7 @@ export default {
     this.$el.addEventListener('click', this.dismissActiveForms)
     // Closing card window will change back to board URL
     $('#cardModal').on('hide.bs.modal', () => {
-      this.$router.push({name: 'board', params: {boardId: this.board.id}})
+      this.$router.push({name: 'board', params: {board_id: this.board.id}})
     })
   },
   beforeDestroy () {
@@ -158,13 +158,13 @@ export default {
       if (this.$route.params.cardId) {
         console.log('[BoardPage] Opened with card URL')
         this.loadCard(this.$route.params.cardId).then(card => {
-          return this.loadBoard(card.boardId)
+          return this.loadBoard(card.board_id)
         }).then(() => {
           this.openCardWindow()
         })
       } else {
         console.log('[BoardPage] Opened with board URL')
-        this.loadBoard(this.$route.params.boardId)
+        this.loadBoard(this.$route.params.board_id)
       }
     },
     loadCard (cardId) {
@@ -178,10 +178,10 @@ export default {
         })
       })
     },
-    loadBoard (boardId) {
+    loadBoard (board_id) {
       return new Promise(resolve => {
-        console.log('[BoardPage] Loading board ' + boardId)
-        boardService.getBoard(boardId).then(data => {
+        console.log('[BoardPage] Loading board ' + board_id)
+        boardService.getBoard(board_id).then(data => {
           this.team.name = data.team ? data.team.name : ''
           this.board.id = data.board.id
           this.board.personal = data.board.personal
@@ -191,7 +191,7 @@ export default {
 
           data.members.forEach(member => {
             this.members.push({
-              id: member.userId,
+              id: member.user_id,
               name: member.name,
               shortName: member.shortName
             })
@@ -253,7 +253,7 @@ export default {
         return
       }
       const cardList = {
-        boardId: this.board.id,
+        board_id: this.board.id,
         name: this.addListForm.name,
         position: this.cardLists.length + 1
       }
@@ -278,7 +278,7 @@ export default {
       }
 
       const card = {
-        boardId: this.board.id,
+        board_id: this.board.id,
         cardListId: cardList.id,
         title: cardList.cardForm.title,
         position: cardList.cards.length + 1
@@ -319,7 +319,7 @@ export default {
 
       // Get the latest card list order and send it to the back-end
       const positionChanges = {
-        boardId: this.board.id,
+        board_id: this.board.id,
         cardListPositions: []
       }
 
@@ -345,7 +345,7 @@ export default {
       }
 
       const positionChanges = {
-        boardId: this.board.id,
+        board_id: this.board.id,
         cardPositions: []
       }
 
@@ -365,11 +365,11 @@ export default {
         notify.error(error.message)
       })
     },
-    subscribeToRealTimUpdate (boardId) {
-      this.$rt.subscribe('/board/' + boardId, this.onRealTimeUpdated)
+    subscribeToRealTimUpdate (board_id) {
+      this.$rt.subscribe('/board/' + board_id, this.onRealTimeUpdated)
     },
-    unsubscribeFromRealTimeUpdate (boardId) {
-      this.$rt.unsubscribe('/board/' + boardId, this.onRealTimeUpdated)
+    unsubscribeFromRealTimeUpdate (board_id) {
+      this.$rt.unsubscribe('/board/' + board_id, this.onRealTimeUpdated)
     },
     onRealTimeUpdated (update) {
       console.log('[BoardPage] Real time update received', update)

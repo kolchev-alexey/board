@@ -12,11 +12,11 @@ export default {
   created () {
     this.$bus.$on('myDataFetched', myData => {
       // Initializing the real time connection
-      this.$rt.init(myData.settings.realTimeServerUrl, myData.user.token)
+      // this.$rt.init(myData.settings.realTimeServerUrl, myData.user.token)
     })
 
     this.$bus.$on('user.unauthenticated', () => {
-      this.$router.push({name: 'login'})
+      // this.$router.push({name: 'login'})
     })
   }
 }

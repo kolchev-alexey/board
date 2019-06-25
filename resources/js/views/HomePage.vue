@@ -44,9 +44,9 @@
 
 <script>
 import $ from 'jquery'
-import PageHeader from '@/components/PageHeader.vue'
-import CreateBoardModal from '@/modals/CreateBoardModal.vue'
-import CreateTeamModal from '@/modals/CreateTeamModal.vue'
+import PageHeader from '../components/PageHeader.vue'
+import CreateBoardModal from '../modals/CreateBoardModal.vue'
+import CreateTeamModal from '../modals/CreateTeamModal.vue'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -69,7 +69,7 @@ export default {
   },
   methods: {
     openBoard (board) {
-      this.$router.push({name: 'board', params: {boardId: board.id}})
+      this.$router.push({name: 'board', params: {board_id: board.id}})
     },
     createBoard (team) {
       this.selectedTeamId = team ? team.id : 0
@@ -78,8 +78,8 @@ export default {
     createTeam () {
       $('#createTeamModal').modal('show')
     },
-    onBoardCreated (boardId) {
-      this.$router.push({name: 'board', params: {boardId: boardId}})
+    onBoardCreated (board_id) {
+      this.$router.push({name: 'board', params: {board_id: board_id}})
     }
   }
 }

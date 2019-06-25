@@ -1,6 +1,6 @@
 import axios from 'axios'
-import errorParser from '@/utils/error-parser'
-import eventBus from '@/event-bus'
+import errorParser from '../utils/error-parser'
+import eventBus from '../event-bus'
 
 export default {
   /**

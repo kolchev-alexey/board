@@ -47,8 +47,8 @@
 <script>
 import 'bootstrap/dist/js/bootstrap.min'
 import { mapGetters } from 'vuex'
-import meService from '@/services/me'
-import notify from '@/utils/notify'
+import meService from '../services/me'
+import notify from '../utils/notify'
 
 export default {
   name: 'PageHeader',
