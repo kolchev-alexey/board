@@ -49,7 +49,7 @@
                     </div>
                     <div class="media-body">
                       <h6 class="mt-0 mb-1"><a :href="attachment.fileUrl" target="_blank">{{ attachment.fileName }}</a></h6>
-                      <p class="when">Added {{ when(attachment.createdDate) }} ago</p>
+                      <p class="when">Added {{ when(attachment.created_at) }}</p>
                     </div>
                   </li>
                 </ul>
@@ -73,8 +73,8 @@
               </h5>
               <div class="wrapper-body">
                 <div class="activity" v-for="activity in cardActivities" v-bind:key="activity.id">
-                  <div><strong>{{ activity.user.name }}</strong> <span class="when">{{ activity.when }} ago</span></div>
-                  <div class="detail" :class="activity.type">{{ activity.actionDetail }}</div>
+                  <div><strong>{{ activity.user.name }}</strong> <span class="when">{{ when(activity.created_at) }}</span></div>
+                  <div class="detail" :class="activity.class">{{ activity.actionDetail }}</div>
                 </div>
               </div>
             </div>
@@ -104,7 +104,7 @@
 
 <script>
 import $ from 'jquery'
-import { formatDistance } from 'date-fns'
+import moment from 'moment'
 import autosize from 'autosize'
 import showdown from 'showdown'
 import notify from '../utils/notify'
@@ -153,29 +153,28 @@ export default {
       this.activities.forEach(activity => {
         const detail = JSON.parse(activity.detail)
         let actionDetail = ''
-        if (activity.type === 'add-comment') {
+        if (activity.class === 'add-comment') {
           actionDetail = detail.comment
-        } else if (activity.type === 'add-card') {
+        } else if (activity.class === 'add-card') {
           actionDetail = 'Added this card'
-        } else if (activity.type === 'add-attachment') {
+        } else if (activity.class === 'add-attachment') {
           actionDetail = 'Added attachment ' + detail.fileName
-        } else if (activity.type === 'change-card-description') {
+        } else if (activity.class === 'change-card-description') {
           actionDetail = 'Changed card description'
-        } else if (activity.type === 'change-card-title') {
+        } else if (activity.class === 'change-card-title') {
           actionDetail = 'Changed card title'
         }
 
         cardActivities.push({
-          user: userById[activity.userId],
-          type: activity.type,
+          user: userById[activity.user_id],
+          class: activity.class,
           actionDetail: actionDetail,
-          when: formatDistance(new Date(activity.createdDate), now),
-          createdDate: activity.createdDate
+          created_at: activity.created_at
         })
       })
-      cardActivities.sort((a1, a2) => {
-        return a2.createdDate - a1.createdDate
-      })
+      // cardActivities.sort((a1, a2) => {
+      //   return a2.created_at - a1.created_at
+      // })
       return cardActivities
     },
     cardAttachments () {
@@ -183,9 +182,9 @@ export default {
       this.attachments.forEach(attachment => {
         cardAttachments.push(attachment)
       })
-      return cardAttachments.sort((a, b) => {
-        return b.createdDate - a.createdDate
-      })
+      // return cardAttachments.sort((a, b) => {
+      //   return b.created_at - a.created_at
+      // })
     },
     attachmentUploadUrl () {
       return this.card.id ? '/api/cards/' + this.card.id + '/attachments' : ''
@@ -217,17 +216,19 @@ export default {
   },
   methods: {
     changeCardTitle () {
-      cardService.changeCardTitle(this.cardId, this.title).then(() => {
+      cardService.changeCardTitle(this.cardId, this.title).then((activity) => {
         this.$emit('titleChanged', {cardId: this.cardId, title: this.title})
         $('#cardModal').focus()
+        this.activities.unshift(activity)
       }).catch(error => {
         notify.error(error.message)
       })
     },
     changeCardDescription () {
-      cardService.changeCardDescription(this.cardId, this.description).then(() => {
+      cardService.changeCardDescription(this.cardId, this.description).then((activity) => {
         this.$emit('descriptionChanged', {cardId: this.cardId, description: this.description})
         this.editingDescription = false
+        this.activities.unshift(activity)
       }).catch(error => {
         notify.error(error.message)
       })
@@ -243,9 +244,9 @@ export default {
       this.editingDescription = false
     },
     addComment () {
-      cardService.addCardComment(this.cardId, this.newComment).then(commentActivity => {
+      cardService.addCardComment(this.cardId, this.newComment).then(activity => {
         this.newComment = ''
-        this.activities.push(commentActivity)
+        this.activities.unshift(activity)
       }).catch(error => {
         notify.error(error.message)
       })
@@ -285,8 +286,8 @@ export default {
         })
       }
     },
-    when (createdDate) {
-      return formatDistance(new Date(createdDate), new Date())
+    when (created_at) {
+      return moment(created_at, 'YYYY-MM-DD HH:mm:ss').fromNow()
     },
     close () {
       $('#cardModal').modal('hide')
