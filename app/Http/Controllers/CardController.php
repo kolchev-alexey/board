@@ -6,9 +6,11 @@ use App\User;
 use App\Card;
 use App\CardList;
 use App\Activity;
+use App\Attachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CardController extends Controller
 {
@@ -34,7 +36,12 @@ class CardController extends Controller
 
     public function showAttachments($card_id)
     {
-        return ['attachments' => []];
+        $attachments = Attachment::select('id', 'user_id', 'created_at', 'file_name', 'file_type', 'file_path')
+            ->where('card_id', $card_id)
+            ->latest()
+            ->get();
+
+        return ['attachments' => $attachments];
     }
 
     public function store(Request $request)
@@ -144,6 +151,15 @@ class CardController extends Controller
         return $activity;
     }
 
+    public function getAttachment($file_path)
+    {
+        $attachment = Attachment::where('file_path', $file_path)->first();
+
+        if (!$attachment) abort(400, 'File not found.');
+
+        return Storage::download($attachment->file_path, $attachment->file_name);
+    }
+
     public function storeAttachment(Request $request, $card_id)
     {
         $this->validate($request, [
@@ -152,14 +168,33 @@ class CardController extends Controller
 
         $card = Card::findOrFail($card_id);
 
+        $file = $request->file('file');
+        $path = Storage::putFile('attachments', $file);
+
+        $attachment = Attachment::create([
+            'user_id' => Auth::user()->id,
+            'card_id' => $card->id,
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'file_type' => $file->getClientOriginalExtension(),
+        ]);
+
         $activity = Activity::create([
             'user_id' => Auth::user()->id,
             'card_id' => $card->id,
-            'board_id' => $card->board_id,
-            'type' => null, //add-attachment
-            'detail' => json_encode(["comment" => $request->comment], JSON_UNESCAPED_UNICODE),
+            'type' => 14, //add-attachment
+            'detail' => json_encode(["fileName" => $file->getClientOriginalName(), 'cardTitle' => $card->title, 'attachmentId' => $attachment->id], JSON_UNESCAPED_UNICODE),
         ]);
 
-        return $activity;
+        return $attachment;
+    }
+
+    public function deleteAttachment($card_id, $attachment_id)
+    {
+        $attachment = Attachment::findOrFail($attachment_id);
+
+        Storage::delete($attachment->file_path);
+
+        $attachment->delete();
     }
 }

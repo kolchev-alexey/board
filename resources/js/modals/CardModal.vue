@@ -38,18 +38,18 @@
               <div class="wrapper-body">
                 <div class="uploading" v-show="uploadingCount"><font-awesome-icon icon="spinner" class="fa-spin" spin/>Uploading...</div>
                 <ul class="list-unstyled">
-                  <li class="media" v-for="attachment in cardAttachments" v-bind:key="attachment.id">
+                  <li class="media" v-for="(attachment, index) in cardAttachments" v-bind:key="attachment.id">
                     <div class="mr-3">
                       <div class="preview thumbnail" v-if="attachment.previewUrl">
                         <img :src="attachment.previewUrl" />
                       </div>
                       <div class="preview file-type" v-if="!attachment.previewUrl">
-                        {{ attachment.fileType }}
+                        {{ attachment.file_type }}
                       </div>
                     </div>
                     <div class="media-body">
-                      <h6 class="mt-0 mb-1"><a :href="attachment.fileUrl" target="_blank">{{ attachment.fileName }}</a></h6>
-                      <p class="when">Added {{ when(attachment.created_at) }}</p>
+                      <h6 class="mt-0 mb-1"><a :href="attachment.fileUrl" target="_blank">{{ attachment.file_name }}</a></h6>
+                      <p class="when">Added {{ when(attachment.created_at) }} - <span class="underline" @click="deleteAttachment(attachment, index)">Delete</span></p>
                     </div>
                   </li>
                 </ul>
@@ -144,37 +144,20 @@ export default {
         return []
       }
 
+      const cardActivities = []
       const userById = {}
       this.members.forEach(member => {
         userById[member.id] = member
       })
-      const cardActivities = []
-      const now = new Date()
       this.activities.forEach(activity => {
-        const detail = JSON.parse(activity.detail)
-        let actionDetail = ''
-        if (activity.class === 'add-comment') {
-          actionDetail = detail.comment
-        } else if (activity.class === 'add-card') {
-          actionDetail = 'Added this card'
-        } else if (activity.class === 'add-attachment') {
-          actionDetail = 'Added attachment ' + detail.fileName
-        } else if (activity.class === 'change-card-description') {
-          actionDetail = 'Changed card description'
-        } else if (activity.class === 'change-card-title') {
-          actionDetail = 'Changed card title'
-        }
-
         cardActivities.push({
           user: userById[activity.user_id],
           class: activity.class,
-          actionDetail: actionDetail,
+          actionDetail: activity.actionDetail,
           created_at: activity.created_at
         })
       })
-      // cardActivities.sort((a1, a2) => {
-      //   return a2.created_at - a1.created_at
-      // })
+
       return cardActivities
     },
     cardAttachments () {
@@ -182,9 +165,8 @@ export default {
       this.attachments.forEach(attachment => {
         cardAttachments.push(attachment)
       })
-      // return cardAttachments.sort((a, b) => {
-      //   return b.created_at - a.created_at
-      // })
+
+      return cardAttachments;
     },
     attachmentUploadUrl () {
       return this.card.id ? '/api/cards/' + this.card.id + '/attachments' : ''
@@ -277,7 +259,7 @@ export default {
     },
     onAttachmentUploaded (attachment) {
       this.uploadingCount--
-      this.attachments.push(attachment)
+      this.attachments.unshift(attachment)
       if (!this.card.coverImage && attachment.previewUrl) {
         this.$emit('coverImageChanged', {
           cardId: this.card.id,
@@ -285,6 +267,13 @@ export default {
           coverImage: attachment.previewUrl
         })
       }
+    },
+    deleteAttachment(attachment, index) {
+      cardService.deleteCardAttachment(this.cardId, attachment.id).then((data) => {
+        this.attachments.splice(index, 1);
+      }).catch(error => {
+        notify.error(error.message)
+      })
     },
     when (created_at) {
       return moment(created_at, 'YYYY-MM-DD HH:mm:ss').fromNow()
@@ -454,26 +443,31 @@ export default {
             }
 
             .preview {
-              width: 145px;
-              height: 90px;
+              width: 112px;
+              height: 80px;
               background: #e4e4e4;
 
               img {
-                max-width: 145px;
-                max-height: 90px;
+                max-width: 112px;
+                max-height: 80px;
               }
             }
 
             .preview.file-type {
               text-align: center;
               border: 1px solid #eee;
-              line-height: 90px;
+              line-height: 80px;
               font-size: 1.5rem;
               overflow: hidden;
             }
 
             .when {
               color: #999;
+
+              .underline {
+                text-decoration: underline;
+                cursor: pointer;
+              }
             }
           }
         }

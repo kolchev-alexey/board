@@ -34,6 +34,9 @@ Route::get('/api/cards/{card_id}/attachments', 'CardController@showAttachments')
 Route::put('/api/cards/{card_id}/title', 'CardController@updateTitle');
 Route::put('/api/cards/{card_id}/description', 'CardController@updateDescription');
 Route::post('/api/cards/{card_id}/comments', 'CardController@storeComment');
+Route::delete('/api/cards/{card_id}/attachments/{attachment_id}', 'CardController@deleteAttachment');
 Route::post('/api/cards/{card_id}/attachments', 'CardController@storeAttachment');
 Route::post('/api/cards/positions', 'CardController@storePositions');
 Route::post('/api/cards', 'CardController@store');
+
+Route::get('/local-file/{file_path}', 'CardController@getAttachment')->where('file_path', '.*');;

@@ -77,5 +77,14 @@ export default {
         reject(errorParser.parse(error))
       })
     })
+  },
+  deleteCardAttachment (cardId, attachment_id) {
+    return new Promise((resolve, reject) => {
+      axios.delete('/cards/' + cardId + '/attachments/' + attachment_id).then(({data}) => {
+        resolve(data)
+      }).catch(error => {
+        reject(errorParser.parse(error))
+      })
+    })
   }
 }
