@@ -45,7 +45,6 @@
 </template>
 
 <script>
-import 'bootstrap/dist/js/bootstrap.min'
 import { mapGetters } from 'vuex'
 import meService from '../services/me'
 import notify from '../utils/notify'
@@ -70,7 +69,7 @@ export default {
       this.$router.push({name: 'home'})
     },
     openBoard (board) {
-      this.$router.push({name: 'board', params: { boardId: board.id }})
+      this.$router.push({name: 'board', params: { board_id: board.id }})
     },
     signOut () {
       this.$rt.logout()

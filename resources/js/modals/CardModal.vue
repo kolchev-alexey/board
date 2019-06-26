@@ -33,12 +33,12 @@
                 <div class="description" v-show="description && !editingDescription" v-html="descriptionHtml"></div>
               </div>
             </div>
-            <div class="wrapper attachments-wrapper" v-show="attachments.length || uploadingCount">
+            <div class="wrapper attachments-wrapper" v-show="card.attachments || uploadingCount">
               <h5><font-awesome-icon icon="paperclip" class="icon"/> <span>Attachments</span></h5>
               <div class="wrapper-body">
                 <div class="uploading" v-show="uploadingCount"><font-awesome-icon icon="spinner" class="fa-spin" spin/>Uploading...</div>
                 <ul class="list-unstyled">
-                  <li class="media" v-for="(attachment, index) in cardAttachments" v-bind:key="attachment.id">
+                  <li class="media" v-for="(attachment, index) in card.attachments" v-bind:key="attachment.id">
                     <div class="mr-3">
                       <div class="preview thumbnail" v-if="attachment.previewUrl">
                         <img :src="attachment.previewUrl" />
@@ -72,7 +72,7 @@
                 <span>Activities</span>
               </h5>
               <div class="wrapper-body">
-                <div class="activity" v-for="activity in cardActivities" v-bind:key="activity.id">
+                <div class="activity" v-for="activity in card.activities" v-bind:key="activity.id">
                   <div><strong>{{ activity.user.name }}</strong> <span class="when">{{ when(activity.created_at) }}</span></div>
                   <div class="detail" :class="activity.class">{{ activity.actionDetail }}</div>
                 </div>
@@ -139,35 +139,6 @@ export default {
       }
       return markdownConverter.makeHtml(this.description)
     },
-    cardActivities () {
-      if (!this.members.length || !this.activities.length) {
-        return []
-      }
-
-      const cardActivities = []
-      const userById = {}
-      this.members.forEach(member => {
-        userById[member.id] = member
-      })
-      this.activities.forEach(activity => {
-        cardActivities.push({
-          user: userById[activity.user_id],
-          class: activity.class,
-          actionDetail: activity.actionDetail,
-          created_at: activity.created_at
-        })
-      })
-
-      return cardActivities
-    },
-    cardAttachments () {
-      const cardAttachments = []
-      this.attachments.forEach(attachment => {
-        cardAttachments.push(attachment)
-      })
-
-      return cardAttachments;
-    },
     attachmentUploadUrl () {
       return this.card.id ? '/api/cards/' + this.card.id + '/attachments' : ''
     }
@@ -191,9 +162,6 @@ export default {
       setTimeout(() => {
         autosize.update($('.auto-size'))
       }, 0)
-
-      this.loadActivities()
-      this.loadAttachments()
     })
   },
   methods: {
@@ -201,7 +169,7 @@ export default {
       cardService.changeCardTitle(this.cardId, this.title).then((activity) => {
         this.$emit('titleChanged', {cardId: this.cardId, title: this.title})
         $('#cardModal').focus()
-        this.activities.unshift(activity)
+        this.card.activities.unshift(activity)
       }).catch(error => {
         notify.error(error.message)
       })
@@ -210,7 +178,7 @@ export default {
       cardService.changeCardDescription(this.cardId, this.description).then((activity) => {
         this.$emit('descriptionChanged', {cardId: this.cardId, description: this.description})
         this.editingDescription = false
-        this.activities.unshift(activity)
+        this.card.activities.unshift(activity)
       }).catch(error => {
         notify.error(error.message)
       })
@@ -228,21 +196,7 @@ export default {
     addComment () {
       cardService.addCardComment(this.cardId, this.newComment).then(activity => {
         this.newComment = ''
-        this.activities.unshift(activity)
-      }).catch(error => {
-        notify.error(error.message)
-      })
-    },
-    loadActivities () {
-      cardService.getCardActivities(this.cardId).then(({activities}) => {
-        this.activities = activities
-      }).catch(error => {
-        notify.error(error.message)
-      })
-    },
-    loadAttachments () {
-      cardService.getCardAttachments(this.cardId).then(({attachments}) => {
-        this.attachments = attachments
+        this.card.activities.unshift(activity)
       }).catch(error => {
         notify.error(error.message)
       })
@@ -259,7 +213,7 @@ export default {
     },
     onAttachmentUploaded (attachment) {
       this.uploadingCount--
-      this.attachments.unshift(attachment)
+      this.card.attachments.unshift(attachment)
       if (!this.card.coverImage && attachment.previewUrl) {
         this.$emit('coverImageChanged', {
           cardId: this.card.id,
@@ -270,7 +224,7 @@ export default {
     },
     deleteAttachment(attachment, index) {
       cardService.deleteCardAttachment(this.cardId, attachment.id).then((data) => {
-        this.attachments.splice(index, 1);
+        this.card.attachments.splice(index, 1);
       }).catch(error => {
         notify.error(error.message)
       })

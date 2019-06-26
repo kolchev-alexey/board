@@ -21,27 +21,22 @@ class CardController extends Controller
 
     public function show($card_id)
     {
-        return Card::findOrFail($card_id);
-    }
+        $card = Card::findOrFail($card_id)->toArray();
 
-    public function showActivities($card_id)
-    {
-        $activities = Activity::select('id', 'type', 'user_id', 'created_at', 'detail')
+        $card['activities'] = Activity::select('id', 'type', 'user_id', 'created_at', 'detail')
+            ->with('user')
             ->where('card_id', $card_id)
             ->latest()
-            ->get();
+            ->get()
+            ->toArray();
 
-        return ['activities' => $activities];
-    }
-
-    public function showAttachments($card_id)
-    {
-        $attachments = Attachment::select('id', 'user_id', 'created_at', 'file_name', 'file_type', 'file_path')
+        $card['attachments'] = Attachment::select('id', 'user_id', 'created_at', 'file_name', 'file_type', 'file_path')
             ->where('card_id', $card_id)
             ->latest()
-            ->get();
+            ->get()
+            ->toArray();
 
-        return ['attachments' => $attachments];
+        return $card;
     }
 
     public function store(Request $request)
@@ -81,6 +76,7 @@ class CardController extends Controller
 
         foreach ($request->cardPositions as $key => $item) {
             $card = Card::find($item['cardId']);
+            $card->card_list_id = $item['cardListId'];
             $card->position = $item['position'];
             $card->save();
         }
@@ -147,6 +143,8 @@ class CardController extends Controller
             'type' => 18, //add-comment
             'detail' => json_encode(["comment" => $request->comment], JSON_UNESCAPED_UNICODE),
         ]);
+
+        $activity['user'] = Auth::user();
 
         return $activity;
     }

@@ -54,4 +54,9 @@ class Activity extends Model
 
         return $desc;
     }
+
+    public function user()
+    {
+        return $this->belongsTo('App\User');
+    }
 }

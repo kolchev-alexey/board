@@ -29,8 +29,6 @@ Route::post('/api/card-lists', 'CardListController@store');
 Route::post('/api/card-lists/positions', 'CardListController@storePositions');
 
 Route::get('/api/cards/{card_id}', 'CardController@show');
-Route::get('/api/cards/{card_id}/activities', 'CardController@showActivities');
-Route::get('/api/cards/{card_id}/attachments', 'CardController@showAttachments');
 Route::put('/api/cards/{card_id}/title', 'CardController@updateTitle');
 Route::put('/api/cards/{card_id}/description', 'CardController@updateDescription');
 Route::post('/api/cards/{card_id}/comments', 'CardController@storeComment');
